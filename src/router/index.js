@@ -8,11 +8,15 @@ const routes = [
     redirect: '/ebook'
   },
   {
+    path: '/home',
+    component: () => import('../views/home')
+  },
+  {
     path: '/ebook',
     component: () => import('../views/ebook/index'),
     children: [
       {
-        path: ':/fileName',
+        path: ':fileName',
         component: () => import('../components/ebook/EbookReader')
       }
     ]
