@@ -43,10 +43,12 @@
         this.book = new Epub(url)
         this.setCurrentBook(this.book)
         this.rendition = this.book.renderTo('read', {
+          width: window.innerWidth,
           height: window.innerHeight,
           method: 'default'
         })
         const cfi = getLocation(this.fileName)
+        console.log('开头', cfi)
         this.display(cfi, () => {
           this.initTheme()
           this.initFontSize()
@@ -58,13 +60,6 @@
            this.refreshLocation()
            this.setBookAvailable(true)
         })
-      },
-      initLocation() {
-        const cfi = getLocation()
-        console.log(cfi)
-        if (cfi) {
-          this.displayProgress(cfi)
-        }
       },
       initGesture() {
         this.rendition.on('touchstart', event => {
@@ -88,10 +83,11 @@
       initTheme() {
         //设置默认并缓存默认
         let defaultTheme = getTheme(this.fileName)
-        this.setDefaultTheme(defaultTheme)
         if (!defaultTheme) {
           defaultTheme = this.themeList[0].name
           saveTheme(this.fileName, defaultTheme)
+        } else {
+          this.setDefaultTheme(defaultTheme)
         }
         //注册皮肤
         this.switchTheme()
