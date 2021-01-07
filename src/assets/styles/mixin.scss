@@ -98,12 +98,12 @@ $ratio: 375 / 10;
   overflow: hidden;
   white-space: nowrap;
 }
-
+//多行省略号
 @mixin ellipsis2($line) {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: $line;
-  word-break: keep-all;
+  word-break: keep-all; //到单词换行
   white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;

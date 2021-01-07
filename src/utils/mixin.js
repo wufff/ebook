@@ -33,13 +33,14 @@ export const ebookMixin = {
     },
     getSectionName() {
       //console.log(this.section)
-      if (this.section) {
-        const section = this.currentBook.section(this.section)
-        if (section && section.href) {
-          return this.currentBook.navigation.get(section.href).label
-          //return this.navigation[this.section].label
-        }
-      }
+      // if (this.section) {
+      //   const section = this.currentBook.section(this.section)
+      //   if (section && section.href) {
+      //     return this.currentBook.navigation.get(section.href).label
+      //     //return this.navigation[this.section].label
+      //   }
+      // }
+      return this.section ? this.navigation[this.section].label : ''
     }
   },
   data() {
@@ -211,17 +212,17 @@ export const ebookMixin = {
     },
     refreshLocation() {
        const currentLocation = this.currentBook.rendition.currentLocation()
-       console.log(currentLocation)
-       const startCfi = currentLocation.start.cfi
-       const section = currentLocation.start.index
-       const progress = this.currentBook.locations.percentageFromCfi(startCfi)
-       //设置滚动条位置
-       this.setProgress(Math.floor(progress * 100))
-       //设置进度牵连章节文字
-       this.setSection(section)
-       //存储进度
-      console.log(startCfi)
-       saveLocation(this.fileName, startCfi)
+       if (currentLocation && currentLocation.start) { //处理快速点击报错
+         const startCfi = currentLocation.start.cfi
+         const section = currentLocation.start.index
+         const progress = this.currentBook.locations.percentageFromCfi(startCfi)
+         //设置滚动条位置
+         this.setProgress(Math.floor(progress * 100))
+         //设置进度牵连章节文字
+         this.setSection(section)
+         //存储进度
+         saveLocation(this.fileName, startCfi)
+       }
     },
     // refreshLocation2() {
     //   const currentLocation = this.currentBook.rendition.currentLocation()

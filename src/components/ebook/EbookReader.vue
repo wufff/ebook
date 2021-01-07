@@ -42,23 +42,28 @@
         //渲染电子书
         this.book = new Epub(url)
         this.setCurrentBook(this.book)
+        this.initRendition()
+        this.initGesture()
+        this.pareBook()
+      },
+      initRendition () {
         this.rendition = this.book.renderTo('read', {
           width: window.innerWidth,
           height: window.innerHeight,
           method: 'default'
         })
         const cfi = getLocation(this.fileName)
-        console.log('开头', cfi)
+        //console.log('开头', cfi)
         this.display(cfi, () => {
           this.initTheme()
           this.initFontSize()
           this.initFontFamily()
         })
         this.book.ready.then(() => {
-           return this.book.locations.generate(750 * (window.innerWidth / 375) * (getFontSize(this.fileName) / 16))
+          return this.book.locations.generate(750 * (window.innerWidth / 375) * (getFontSize(this.fileName) / 16))
         }).then((locations) => {
-           this.refreshLocation()
-           this.setBookAvailable(true)
+          this.refreshLocation()
+          this.setBookAvailable(true)
         })
       },
       initGesture() {
@@ -110,6 +115,40 @@
         this.setFontFamily(font)
         return font
       },
+      pareBook() {
+        //获取图书封面
+        this.book.loaded.cover.then(cover => {
+          this.book.archive.createUrl(cover).then(url => {
+            this.setCover(url)
+          })
+        })
+        //获取图书基本信息
+        this.book.loaded.metadata.then(matedata => {
+           this.setMetadata(matedata)
+        })
+        //获取图书目录
+        this.book.loaded.navigation.then(nav => {
+          const navItem = (function flatten(arr) {
+            return [].concat(...arr.map(v => [v, ...flatten(v.subitems)]))
+          })(nav.toc)
+          function find(item, v = 0) {
+            const parent = navItem.filter(it => it.id === item.parent)[0]
+            return !item.parent ? v : (parent ? find(parent, ++v) : v)
+          }
+          navItem.forEach(item => {
+            item.level = find(item)
+            item.total = 0
+            item.pagelist = []
+            if (item.href.match(/^(.*)\.html$/)) {
+              item.idhref = item.href.match(/^(.*)\.html$/)[1]
+            } else if (item.href.match(/^(.*)\.xhtml$/)) {
+              item.idhref = item.href.match(/^(.*)\.xhtml$/)[1]
+            }
+          })
+          this.setNavigation(navItem)
+          this.setIsPaginating(false)
+        })
+      },
       onMaskClick(e) {
         if (this.mouseMove === 2) {
         } else if (this.mouseMove === 1 || this.mouseMove === 4) {
@@ -139,9 +178,6 @@
       moveEnd() {
         this.$store.dispatch('setOffsetY', 0)
         this.firstOffsetY = 0
-      },
-      toggleTitleAndMenu() {
-        this.$store.dispatch('setMenuVisible', !this.menuVisible)
       },
       prevPage() {
         if (this.rendition) {
